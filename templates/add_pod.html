@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>dw</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+</br>
+<nav class="nav nav-pills">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="#">Docker Watcher</a>
+        </div>
+        <ul class="nav nav-pills">
+            <li ><a href="/">Summary</a></li>
+            <li class="active"><a href="/add_pod">Add pod</a></li>
+            <li><a href="#">Remove pod</a></li>
+            <li><a href="#">Add slave</a></li>
+            <li><a href="#">Remove slave</a></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container">
+    {% if done %}
+        <br>
+        <h3> Done! </h3>
+    {% else %}
+<form>
+    <br>
+   Pod name:<br>
+  <input type="text" name="pod_name"><br>
+    Containers number:<br>
+  <input type="text" name="containers_number"><br>
+    CPU count:<br>
+  <input type="text" name="cpu_count"><br>
+    Memory MB:<br>
+  <input type="text" name="memory_mb"><br>
+    Disk GB:<br>
+  <input type="text" name="disk_gb"><br>
+    <br>
+    <input type="submit" class="btn btn-primary" value="Add pod">
+</form>
+    {% endif %}
+</div>
+</body>
+</html>
