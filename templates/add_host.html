@@ -17,9 +17,9 @@
         </div>
         <ul class="nav nav-pills">
             <li ><a href="/">Summary</a></li>
-            <li class="active"><a href="/add_pod">Add pod</a></li>
+            <li><a href="/add_pod">Add pod</a></li>
             <li><a href="#">Remove pod</a></li>
-            <li><a href="/add_host">Add host</a></li>
+            <li class="active"><a href="/add_host">Add host</a></li>
             <li><a href="#">Remove host</a></li>
         </ul>
     </div>
@@ -32,20 +32,21 @@
     {% else %}
 <form>
     <br>
-    Name:<br>
-  <input type="text" name="name"><br>
-     Image:<br>
-  <input type="text" name="image"><br>
-    Containers:<br>
-  <input type="text" name="containers"><br>
-    CPUs:<br>
+    Host Name:<br>
+  <input type="text" name="host_name"><br>
+    <br>
+    Host:<br>
+  <input type="text" name="host"><br>
+    Port:<br>
+  <input type="text" name="port"><br>
+    CPUS:<br>
   <input type="text" name="cpus"><br>
     Memory MB:<br>
   <input type="text" name="memory"><br>
     Disk GB:<br>
   <input type="text" name="disk"><br>
     <br>
-    <input type="submit" class="btn btn-primary" value="Add pod">
+    <input type="submit" class="btn btn-primary" value="Add host">
 </form>
     {% endif %}
 </div>

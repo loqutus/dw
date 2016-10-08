@@ -20,19 +20,19 @@
             <li class="active"><a href="/">Summary</a></li>
             <li><a href="/add_pod">Add pod</a></li>
             <li><a href="#">Remove pod</a></li>
-            <li><a href="#">Add slave</a></li>
-            <li><a href="#">Remove slave</a></li>
+            <li><a href="/add_host">Add host</a></li>
+            <li><a href="#">Remove host</a></li>
         </ul>
     </div>
 </nav>
 
 <div class="container">
-    <h2>Total slaves: {{ slaves_total }}</h2>
+    <h2>Total hosts: {{ hosts_total }}</h2>
     <h2>Total pods: {{ pods_total }}</h2>
 
-    {% if print_slaves %}
-        {% for slave in slaves_list %}
-            <h2>{{ slave }}</h2>
+    {% if print_hosts %}
+        {% for host in hosts_list %}
+            <h2>{{ host }}</h2>
         {% endfor %}
     {% endif %}
     {% if print_pods %}
@@ -41,6 +41,6 @@
         {% endfor %}
     {% endif %}
 </div>
-<script>setTimeout("location.reload(true);",10000);</script>
+<script>setTimeout("location.reload(true);", 10000);</script>
 </body>
 </html>
