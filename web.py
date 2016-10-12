@@ -12,7 +12,6 @@ ch = logging.StreamHandler(sys.stdout)
 logging.warning('starting web')
 
 app = Flask(__name__)
-etcd_client = etcd.Client(host=settings.etcd_host, port=settings.etcd_port)
 
 
 @app.route('/add_host')
@@ -35,6 +34,7 @@ def add_host():
             data_list['disk'] = disk
             data_list['containers'] = {}
             data = json.dumps(data_list)
+            etcd_client = etcd.Client(host=settings.etcd_host, port=settings.etcd_port)
             etcd_client.write(settings.etcd_prefix + settings.etcd_hosts_prefix + host_name, data)
             done = True
             logging.debug('host ' + host_name + ' added')
@@ -64,7 +64,9 @@ def add_pod():
             data_list['disk'] = disk
             data_list['state'] = 'stopped'
             data_list['running_containers'] = 0
+            data_list['containers_list'] = []
             data = json.dumps(data_list)
+            etcd_client = etcd.Client(host=settings.etcd_host, port=settings.etcd_port)
             etcd_client.write(settings.etcd_prefix + settings.etcd_pods_prefix + pod_name, data)
             done = True
             logging.debug('pod ' + pod_name + ' added')
@@ -84,6 +86,7 @@ def index():
         pods_list = []
         print_hosts = False
         print_pods = False
+        etcd_client = etcd.Client(host=settings.etcd_host, port=settings.etcd_port)
         hosts_ls = etcd_client.get(settings.etcd_prefix + settings.etcd_hosts_prefix)
         pods_ls = etcd_client.get(settings.etcd_prefix + settings.etcd_pods_prefix)
         for host_ls in hosts_ls.children:
