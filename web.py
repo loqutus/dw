@@ -5,6 +5,7 @@ import settings
 import etcd
 import logging
 import sys
+import ipdb
 
 logging.basicConfig(filename=settings.web_log, level=30,
                     format=u'%(filename)s[LINE:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s', )
@@ -25,7 +26,7 @@ def add_host():
             if request.json:
                 params = request.json
             else:
-                abort(400)
+                return 'FAIL\n'
         done = False
         host_name = params.get('host_name', settings.default_host)
         host = params.get('host', settings.default_host)
@@ -47,8 +48,7 @@ def add_host():
         logging.debug('host ' + host_name + ' added')
         if request.method == 'GET':
             return render_template('add_host.html', done=done)
-        else:
-            return 'OK\n'
+        return 'OK\n'
     except Exception as e:
         logging.error(e, exc_info=True)
         pass
@@ -65,7 +65,7 @@ def add_pod():
             if request.json:
                 params = request.json
             else:
-                abort(400)
+                return 'FAIL\n'
         done = False
         pod_name = params.get('name', settings.default_pod_name)
         if (pod_name != ''):
@@ -75,6 +75,7 @@ def add_pod():
             memory = params.get('memory', settings.default_memory_pod)
             disk = params.get('disk', settings.default_disk_pod)
             data_list = {}
+            data_list['name'] = pod_name
             data_list['image'] = image
             data_list['containers'] = containers
             data_list['cpus'] = cpus
@@ -90,8 +91,7 @@ def add_pod():
             logging.debug('pod ' + pod_name + ' added')
         if request.method == 'GET':
             return render_template('add_pod.html', done=done)
-        else:
-            return 'OK\n'
+        return 'OK\n'
     except Exception as e:
         logging.error(e, exc_info=True)
         pass
@@ -132,4 +132,4 @@ def index():
 
 
 if __name__ == "__main__":
-    app.run(host='::', debug=True)
+    app.run(host='::')

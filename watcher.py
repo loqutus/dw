@@ -8,7 +8,7 @@ import sys
 import time
 import ipdb
 
-logging.basicConfig(filename=settings.watcher_log, level=settings.log_level, format=u'%(asctime)s  %(message)s', )
+logging.basicConfig(filename=settings.watcher_log, level=settings.log_level, format=u'%(filename)s[LINE:%(lineno)d]# %(levelname)-8s %(asctime)s  %(message)s', )
 ch = logging.StreamHandler(sys.stdout)
 
 
@@ -19,6 +19,8 @@ class Watcher:
         self.etcd_prefix = etcd_prefix
         self.etcd_hosts_prefix = etcd_hosts_prefix
         self.etcd_pods_prefix = etcd_pods_prefix
+        self.pods_list = {}
+        self.hosts_list = {}
 
     def get_pods_list(self):
         etcd_client = etcd.Client(host=self.etcd_host, port=self.etcd_port)
@@ -31,7 +33,8 @@ class Watcher:
         if pods_total:
             for pod in pods_ls.children:
                 pods_list[pod.key] = pod.value
-        return pods_list
+        logging.warning(pods_list)
+        self.pods_list = pods_list
 
     def get_hosts_list(self):
         etcd_client = etcd.Client(host=self.etcd_host, port=self.etcd_port)
@@ -43,7 +46,7 @@ class Watcher:
         if hosts_total:
             for host in hosts_ls.children:
                 hosts_list[host.key] = host.value
-        return hosts_list
+        self.hosts_list = hosts_list
 
     def get_host_name(self, input_str):
         return input_str.split('/')[-1]
@@ -84,7 +87,6 @@ class Watcher:
             docker_containers_list = cli.containers()
             for container in docker_containers_list:
                 self.all_running_containers[self.get_host_name(host_path)] += container['Id']
-
     def check_if_container_fits_on_host(self, host, pod):
         host = self.hosts_list[host]
         pod = self.pods_list[pod]
@@ -193,8 +195,8 @@ class Watcher:
     def watch(self):
         while (True):
             logging.warning('starting watcher')
-            self.pods_list = self.get_pods_list()
-            self.hosts_list = self.get_hosts_list()
+            self.get_pods_list()
+            self.get_hosts_list()
             self.get_all_running_containers()
             self.schedule()
             self.write_all_to_etcd()
