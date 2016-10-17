@@ -6,7 +6,6 @@ import docker
 import logging
 import sys
 import time
-import ipdb
 
 logging.basicConfig(filename=settings.watcher_log, level=settings.log_level, format=u'%(filename)s[LINE:%(lineno)d]# %(levelname)-8s %(asctime)s  %(message)s', )
 ch = logging.StreamHandler(sys.stdout)
@@ -33,7 +32,6 @@ class Watcher:
         if pods_total:
             for pod in pods_ls.children:
                 pods_list[pod.key] = pod.value
-        logging.warning(pods_list)
         self.pods_list = pods_list
 
     def get_hosts_list(self):
@@ -60,7 +58,7 @@ class Watcher:
         for pod_path, pod_json in self.pods_list.items():
             if self.get_host_name(pod_path) == pod:
                 pod_json_json = json.loads(pod_json)
-                pod_json_json['containers_list'] .append(str(container_id))
+                pod_json_json['containers_list'].append(str(container_id))
                 self.pods_list[pod_path] = json.dumps(pod_json_json)
         for host_path, host_json in self.hosts_list.items():
             if self.get_host_name(host_path) == host:
@@ -87,6 +85,7 @@ class Watcher:
             docker_containers_list = cli.containers()
             for container in docker_containers_list:
                 self.all_running_containers[self.get_host_name(host_path)] += container['Id']
+
     def check_if_container_fits_on_host(self, host, pod):
         host = self.hosts_list[host]
         pod = self.pods_list[pod]
@@ -102,7 +101,7 @@ class Watcher:
             return True
         return False
 
-    def update_host_config_minus(self, host, pod, container_id):
+    def update_host_config_minus(self, host, pod):
         host = self.hosts_list[host]
         pod = self.pods_list[pod]
         host_json = json.loads(host)
@@ -112,17 +111,16 @@ class Watcher:
         host_memory = int(host_json['memory'])
         pod_memory = int(pod_json['memory'])
         host_disk = int(host_json['disk'])
-        pod_disk = int(host_json['disk'])
+        pod_disk = int(pod_json['disk'])
         new_host_cpus = host_cpus - pod_cpus
         new_host_memory = host_memory - pod_memory
         new_host_disk = host_disk - pod_disk
         host_json['cpus'] = new_host_cpus
         host_json['memory'] = new_host_memory
         host_json['disk'] = new_host_disk
-        host_json['containers'].append(str(container_id))
         self.hosts_list[host] = json.dumps(host_json)
 
-    def update_host_config_plus(self, host, pod, container_id):
+    def update_host_config_plus(self, host, pod):
         host = self.hosts_list[host]
         pod = self.pods_list[pod]
         host_json = json.loads(host)
@@ -132,14 +130,13 @@ class Watcher:
         host_memory = int(host_json['memory'])
         pod_memory = int(pod_json['memory'])
         host_disk = int(host_json['disk'])
-        pod_disk = int(host_json['disk'])
+        pod_disk = int(pod_json['disk'])
         new_host_cpus = host_cpus + pod_cpus
         new_host_memory = host_memory + pod_memory
         new_host_disk = host_disk + pod_disk
         host_json['cpus'] = new_host_cpus
         host_json['memory'] = new_host_memory
         host_json['disk'] = new_host_disk
-        host_json['containers'] -= container_id
         self.hosts_list[host] = json.dumps(host_json)
 
     def find_container_host(self, container_id):
@@ -177,20 +174,18 @@ class Watcher:
                 container_host, container_port = self.find_container_host(container_id)
                 if container_host != False and container_port != False:
                     result = self.stop_container(container_host, container_port, container_id)
+                    self.update_host_config_plus(host_path, pod_path, container_id)
                     logging.warning('removed ' + container_id + ' from ' + container_host)
                 break
             break
 
     def write_all_to_etcd(self):
-        logging.warning(self.pods_list)
-        logging.warning(self.hosts_list)
         etcd_client = etcd.Client(host=self.etcd_host, port=self.etcd_port)
         for pod_path, pod_json in self.pods_list.items():
             etcd_client.set(pod_path, json.dumps(pod_json))
         for host_path, host_json in self.hosts_list.items():
-            logging.error(host_path)
-            logging.error(host_json)
             etcd_client.set(host_path, json.dumps(host_json))
+
 
     def watch(self):
         while (True):
